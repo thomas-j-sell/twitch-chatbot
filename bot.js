@@ -61,7 +61,7 @@ function onMessageHandler (target, context, msg, self) {
         console.log(`Executed ${command} command`)
         break;
       case "!lurk":
-        return_msg = `Hey ${context['display-name']} thanks for the lurk!`
+        return_msg = `${getLurkMessage()} Thanks for the lurk ${context['display-name']} !`
         client.say(target, return_msg)
         console.log(`Executed ${command} command`)
       case "!joke":
@@ -120,6 +120,19 @@ function onConnectedHandler (addr, port) {
 function randomInt (min, max) {
   return Math.floor(Math.random() * (max-min) + min);
 }
+
+
+function getLurkMessage () {
+  return lurkMessages[randomInt(0, lurkMessages.length)];
+}
+
+const lurkMessages = [
+  "Lurk, Lurk, Lurk.",
+  "Live, laugh, Lurk.",
+  "Can you feel the lurk tonight?",
+  "It's the circle of lurk.",
+  "Lurkin at the car wash."
+]
 
 // returns joke
 function getJoke () {
