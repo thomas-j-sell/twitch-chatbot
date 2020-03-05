@@ -26,8 +26,9 @@ client.on('connected', onConnectedHandler);
 // Connect to Twitch:
 client.connect();
 
-// create an array to store points
-points_table = {};
+// queue variables
+let queueIsOpen = false;
+let queue = [];
 
 // Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
@@ -45,29 +46,87 @@ function onMessageHandler (target, context, msg, self) {
     console.log(`  target: ${target}`)
     console.log(`  msg: ${msg}`)
 
+    debugger;
+
     // If the command is known, let's execute it
     switch(command) {
       case "!socials" || "!social":
         client.say(target, socials())
         console.log(`Executed ${command} command`)
         break;
-      case "!games":
-        client.say(target, games())
-        console.log(`Executed ${command} command`)
-        break;
-      case "!points":
-        return_msg = points(target, argument, argument_2)
-        client.say(target, return_msg)
-        console.log(`Executed ${command} command`)
-        break;
       case "!lurk":
         return_msg = `${getLurkMessage()} Thanks for the lurk ${context['display-name']} !`
         client.say(target, return_msg)
         console.log(`Executed ${command} command`)
+        break;
       case "!joke":
         return_msg = getJoke()
         client.say(target, return_msg)
         console.log(`Executed ${command} command`)
+        break;
+      case "!queue":
+        if (isMod(context)) {
+          switch(argument) {
+            case "open":
+              queueIsOpen = true;
+              return_msg = "The queue is now open. You can join with !join."
+              client.say(target, return_msg)
+              console.log(`Executed ${command} command`)
+              break;
+            case "close":
+              queueIsOpen = false;
+              return_msg = "The queue is now closed."
+              client.say(target, return_msg)
+              console.log(`Executed ${command} command`)
+              break;
+            case "pop":
+              if (queue.length > 0) {
+                let next = queue.pop()
+                return_msg = `${next} is up next.`
+              } else {
+                return_msg = "Queue is empty so there's no one to pop."
+              }
+              client.say(target, return_msg)
+              console.log(`Executed ${command} command`)
+              break;
+            default:
+              if (queue.length == 0) {
+                if (queueIsOpen) {
+                  return_msg = "Queue is currently empty. You can join with !join."
+                  console.log('queue is empty and open')
+                } else {
+                  return_msg = "Queue is currently empty. You cannot currently join."
+                  console.log('queue is empty and closed')
+                }
+              } else {
+                return_msg = queue.toString()
+                console.log('queue is not empty')
+              }
+              client.say(target, return_msg)
+              console.log(`Executed ${command} command`)
+          }
+        } else {
+          return_msg = `Sorry ${context['display-name']}, only mods can do that.`
+          client.say(target, return_msg)
+          console.log(`Executed ${command} command`)
+        }
+        break;
+      case "!join":
+        if (queueIsOpen) {
+          if (queue.includes(context['display-name'])) {
+            return_msg = `${context['display-name']} you are already in the queue`
+          } else {
+            queue.push(context['display-name'])
+            let place = queue.indexOf(context['display-name']) + 1
+            return_msg = `${context['display-name']} you have been added to the queue. Your position in line is ${place}`
+          }
+          client.say(target, return_msg)
+          console.log(`Executed ${command} command`)
+        } else {
+          return_msg = `Sorry ${context['display-name']}, the queue is closed.`
+          client.say(target, return_msg)
+          console.log(`Executed ${command} command`)
+        }
         break;
       default:
         console.log(`Unknown command ${command}`)
@@ -82,34 +141,6 @@ function socials () {
   return "If you want to keep up with me on social media you can follow on these platforms: twitter.com/teaja instagram.com/dredgen_teaja"
 }
 
-// !games: print message about my favorite current games
-function games () {
-  return `
-  Spider-Man,
-  Destiny 2,
-  Firewatch,
-  The Witness
-  `
-}
-
-// !points: assing or check points
-// If I make the command add points to someones total
-// If someone else enters the command return their point total
-// TODO this is very ugly, clean up soon
-function points (user, target, argument) {
-  if (user === '#dredgen_teaja') {
-    if (points_table[target]) {
-      points_table[target] += Number(argument)
-    } else {
-      points_table[target] = 0
-      points_table[target] += Number(argument)
-    }
-    return `total points for ${target}: ${points_table[target]}`
-  } else {
-    return `total points for ${user}: ${points_table[user]}`
-  }
-}
-
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
@@ -121,11 +152,17 @@ function randomInt (min, max) {
   return Math.floor(Math.random() * (max-min) + min);
 }
 
+// check if user has mod priviliges
+function isMod (context) {
+  return 'broadcaster' in context['badges'] || 'moderator' in context['badges']
+}
 
+// returns random message from list of lurk messages
 function getLurkMessage () {
   return lurkMessages[randomInt(0, lurkMessages.length)];
 }
 
+// list of lurk messages
 const lurkMessages = [
   "Lurk, Lurk, Lurk.",
   "Live, laugh, Lurk.",
@@ -134,12 +171,12 @@ const lurkMessages = [
   "Lurkin at the car wash."
 ]
 
-// returns joke
+// returns joke from list of jokes
 function getJoke () {
   return jokes[randomInt(0, jokes.length)];
 }
 
-// array of jokes
+// list of jokes
 const jokes = [
   "Some people think filling animals with helium is wrong… I don't judge, whatever floats your goat.",
   "So there was this pun contest…  I entered ten puns in the hopes that one might win. No pun in ten did.",
@@ -191,8 +228,7 @@ const jokes = [
   'A horse walks into a bar. The bartender says “hey”. The horse replies “Sure”.',
   "I used to sell security alarms door to door.  If no one was home I’d just leave a brochure on the kitchen table.",
   "I’ve had amnesia for as long as I can remember.",
-  "What do you call a sea creature that uses a fake name? A pseudonemone.",
-  "I’ve been diagnosed with a fear of giants. Feefiphobia.",
+  "What do you call a sea creature that uses a fake name? A pseudonemone.", "I’ve been diagnosed with a fear of giants. Feefiphobia.",
   "I’m not fond of cheese.  You could say I’m a curd-mudgeon.",
   "I love jokes about eyes, the cornea the better.",
   "I need to cut my fingernails, they’re really getting out of hand.",
