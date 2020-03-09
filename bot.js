@@ -27,6 +27,10 @@ client.on('connected', onConnectedHandler);
 // Connect to Twitch:
 client.connect();
 
+// blind variable
+let isBlind = false;
+const safeword = "chupacabra";
+
 // queue variables
 let queueIsOpen = false;
 let queue = [];
@@ -47,12 +51,10 @@ function onMessageHandler (target, context, msg, self) {
     console.log(`  target: ${target}`)
     console.log(`  msg: ${msg}`)
 
-    debugger;
-
     // If the command is known, let's execute it
     switch(command) {
       case "!commands":
-        return_msg = "Available commands: !social(s), !controller, !lurk, !unlurk, !joke, !queue, !join"
+        return_msg = "Available commands: !social(s), !controller, !lurk, !unlurk, !joke, !blind, !safeword, !queue, !join"
         sendMessage(target, return_msg, command)
         break;
       case "!socials" || "!social":
@@ -70,6 +72,40 @@ function onMessageHandler (target, context, msg, self) {
         break;
       case "!joke":
         sendMessage(target, getJoke(), command)
+        break;
+      case "!blind":
+        switch(argument) {
+          case "on":
+            if (isMod(context)) {
+              isBlind = true
+              sendMessage(target, "Blind mode is now on.", command)
+            } else {
+              return_msg = `Sorry ${context['display-name']}, only mods can do that.`
+              sendMessage(target, return_msg, command)
+            }
+            break;
+          case "off":
+            if (isMod(context)) {
+              isBlind = false
+              sendMessage(target, "Blind mode is now off.", command)
+            } else {
+              return_msg = `Sorry ${context['display-name']}, only mods can do that.`
+              sendMessage(target, return_msg, command)
+            }
+            break;
+          default:
+            if (isBlind) {
+              return_msg = `This is a blind playthrough. Please do not give any hints, tips, or criticisms unless I explicitly ask for them using my safeword: ${safeword}.`
+              sendMessage(target, return_msg, command)
+            } else {
+              return_msg = "This is not a blind playthrough. Tips, hints, and other constructive criticisms are welcome."
+              sendMessage(target, return_msg, command)
+            }
+            break;
+        }
+        break;
+      case "!safeword" || "!safe word":
+        sendMessage(target, `My safeword is ${safeword}.`, command)
         break;
       case "!queue":
         if (isMod(context)) {
