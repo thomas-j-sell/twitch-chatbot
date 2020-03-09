@@ -3,6 +3,7 @@ require('dotenv').config()
 const tmi = require('tmi.js');
 
 // Define configuration options
+// Load variables from .env file
 const opts = {
   identity: {
     username: process.env.BOT_USERNAME,
@@ -50,19 +51,25 @@ function onMessageHandler (target, context, msg, self) {
 
     // If the command is known, let's execute it
     switch(command) {
+      case "!commands":
+        return_msg = "Available commands: !social(s), !controller, !lurk, !unlurk, !joke, !queue, !join"
+        sendMessage(target, return_msg, command)
+        break;
       case "!socials" || "!social":
-        client.say(target, socials())
-        console.log(`Executed ${command} command`)
+        sendMessage(target, socials(), command)
+        break;
+      case "!controller":
+        sendMessage(target, "I use a Scuf Impact: https://scufgaming.com/playstation-impact-controller")
         break;
       case "!lurk":
         return_msg = `${getLurkMessage()} Thanks for the lurk ${context['display-name']} !`
-        client.say(target, return_msg)
-        console.log(`Executed ${command} command`)
+        sendMessage(target, return_msg, command)
+        break;
+      case "!unlurk":
+        sendMessage(target,  `Welcome back ${context['display-name']}.`, command)
         break;
       case "!joke":
-        return_msg = getJoke()
-        client.say(target, return_msg)
-        console.log(`Executed ${command} command`)
+        sendMessage(target, getJoke(), command)
         break;
       case "!queue":
         if (isMod(context)) {
@@ -70,14 +77,12 @@ function onMessageHandler (target, context, msg, self) {
             case "open":
               queueIsOpen = true;
               return_msg = "The queue is now open. You can join with !join."
-              client.say(target, return_msg)
-              console.log(`Executed ${command} command`)
+              sendMessage(target, return_msg, command)
               break;
             case "close":
               queueIsOpen = false;
               return_msg = "The queue is now closed."
-              client.say(target, return_msg)
-              console.log(`Executed ${command} command`)
+              sendMessage(target, return_msg, command)
               break;
             case "pop":
               if (queue.length > 0) {
@@ -86,29 +91,23 @@ function onMessageHandler (target, context, msg, self) {
               } else {
                 return_msg = "Queue is empty so there's no one to pop."
               }
-              client.say(target, return_msg)
-              console.log(`Executed ${command} command`)
+              sendMessage(target, return_msg, command)
               break;
             default:
               if (queue.length == 0) {
                 if (queueIsOpen) {
                   return_msg = "Queue is currently empty. You can join with !join."
-                  console.log('queue is empty and open')
                 } else {
                   return_msg = "Queue is currently empty. You cannot currently join."
-                  console.log('queue is empty and closed')
                 }
               } else {
                 return_msg = queue.toString()
-                console.log('queue is not empty')
               }
-              client.say(target, return_msg)
-              console.log(`Executed ${command} command`)
+              sendMessage(target, return_msg, command)
           }
         } else {
           return_msg = `Sorry ${context['display-name']}, only mods can do that.`
-          client.say(target, return_msg)
-          console.log(`Executed ${command} command`)
+          sendMessage(target, return_msg, command)
         }
         break;
       case "!join":
@@ -120,20 +119,25 @@ function onMessageHandler (target, context, msg, self) {
             let place = queue.indexOf(context['display-name']) + 1
             return_msg = `${context['display-name']} you have been added to the queue. Your position in line is ${place}`
           }
-          client.say(target, return_msg)
-          console.log(`Executed ${command} command`)
+          sendMessage(target, return_msg, command)
         } else {
           return_msg = `Sorry ${context['display-name']}, the queue is closed.`
-          client.say(target, return_msg)
-          console.log(`Executed ${command} command`)
+          sendMessage(target, return_msg, command)
         }
         break;
       default:
         console.log(`Unknown command ${command}`)
     }
   } else {
-    console.log('not a command')
+    // console.log('not a command')
+    // do nothing for regular messages
   }
+}
+
+// sends
+function sendMessage(target, return_msg, command) {
+  client.say(target, return_msg)
+  console.log(`Executed ${command} command`)
 }
 
 // !song: print message about the currently playing song
@@ -243,5 +247,7 @@ const jokes = [
   "How does a mansplainer drink? From a well, actually.",
   "In college my nickname was the love machine. It’s true I was really bad at tennis.",
   "My girlfriend got sick of my beekeeping hobby. She told me I had to chose between her and the bees.  I saw her face and now I’m a bee-leaver.",
-  "I made a new playlist for hiking. It has music from Penuts, the Cranberries, and Eminem. I call it my trail mix."
+  "I made a new playlist for hiking. It has music from Penuts, the Cranberries, and Eminem. I call it my trail mix.",
+  "I bought some shoes from a drug dealer. I don’t know what he laced them with, but I was tripping all day.",
+  "Give a man a duck, and he'll eat for a day. Teach a man to duck, and he'll never walk into a bar."
 ];
