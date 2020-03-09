@@ -108,27 +108,43 @@ function onMessageHandler (target, context, msg, self) {
         sendMessage(target, `My safeword is ${safeword}.`, command)
         break;
       case "!queue":
-        if (isMod(context)) {
           switch(argument) {
             case "open":
-              queueIsOpen = true;
-              return_msg = "The queue is now open. You can join with !join."
-              sendMessage(target, return_msg, command)
+              if (isMod(context)) {
+                queueIsOpen = true;
+                return_msg = "The queue is now open. You can join with !join."
+                sendMessage(target, return_msg, command)
+              } else {
+                return_msg = `Sorry ${context['display-name']}, only mods can do that.`
+                sendMessage(target, return_msg, command)
+              }
               break;
             case "close":
-              queueIsOpen = false;
-              return_msg = "The queue is now closed."
-              sendMessage(target, return_msg, command)
-              break;
-            case "pop":
-              if (queue.length > 0) {
-                let next = queue.pop()
-                return_msg = `${next} is up next.`
+              if (isMod(context)) {
+                queueIsOpen = false;
+                return_msg = "The queue is now closed."
+                sendMessage(target, return_msg, command)
               } else {
-                return_msg = "Queue is empty so there's no one to pop."
+                return_msg = `Sorry ${context['display-name']}, only mods can do that.`
+                sendMessage(target, return_msg, command)
               }
-              sendMessage(target, return_msg, command)
               break;
+            case "next":
+              if (isMod(context)) {
+                if (queue.length > 0) {
+                  let next = queue.shift()
+                  return_msg = `${next} is up next.`
+                } else {
+                  return_msg = "Queue is empty so there's no one to pop."
+                }
+                sendMessage(target, return_msg, command)
+              } else {
+                return_msg = `Sorry ${context['display-name']}, only mods can do that.`
+                sendMessage(target, return_msg, command)
+              }
+              break;
+            case "rules":
+              return_msg = "Queue is FIFO (first in first out). Place in the queue is good for two games, but I might add a third if one gets cut really short."
             default:
               if (queue.length == 0) {
                 if (queueIsOpen) {
@@ -141,19 +157,16 @@ function onMessageHandler (target, context, msg, self) {
               }
               sendMessage(target, return_msg, command)
           }
-        } else {
-          return_msg = `Sorry ${context['display-name']}, only mods can do that.`
-          sendMessage(target, return_msg, command)
-        }
         break;
       case "!join":
         if (queueIsOpen) {
           if (queue.includes(context['display-name'])) {
-            return_msg = `${context['display-name']} you are already in the queue`
+            let place = queue.indexOf(context['display-name']) + 1
+            return_msg = `You are already in the queue ${context['display-name']}. Your position in line is ${place}.`
           } else {
             queue.push(context['display-name'])
             let place = queue.indexOf(context['display-name']) + 1
-            return_msg = `${context['display-name']} you have been added to the queue. Your position in line is ${place}`
+            return_msg = `You have been added to the queue ${context['display-name']}. Your position in line is ${place}.`
           }
           sendMessage(target, return_msg, command)
         } else {
@@ -194,7 +207,7 @@ function randomInt (min, max) {
 
 // check if user has mod priviliges
 function isMod (context) {
-  return 'broadcaster' in context['badges'] || 'moderator' in context['badges']
+  return context['badges'] != null && ('broadcaster' in context['badges'] || 'moderator' in context['badges'])
 }
 
 // returns random message from list of lurk messages
