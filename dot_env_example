@@ -1,0 +1,9 @@
+# Environment Config
+# replace variables in angle brackets (<>) with appropriate strings
+# rename this file ".env"
+# DO NOT INCLUDE .env FILE IN SOURCE CONTROL
+
+
+BOT_USERNAME=<account_name>
+OAUTH_TOKEN=oauth:<oauth key>
+CHANNEL_NAME=<channel name>
