@@ -54,7 +54,7 @@ function onMessageHandler (target, context, msg, self) {
     // If the command is known, let's execute it
     switch(command) {
       case "!commands":
-        return_msg = "Available commands: !bot, !social(s), !controller, !lurk, !unlurk, !brb, !joke, !blind, !safeword, !queue, !join"
+        return_msg = "Available commands: !bot, !social(s), !account(s), !psn, !epic, !activision, !controller, !lurk, !unlurk, !brb, !joke, !blind, !safeword, !queue, !join"
         sendMessage(target, return_msg, command)
         break;
       case "!bot":
@@ -64,6 +64,20 @@ function onMessageHandler (target, context, msg, self) {
       case "!socials": // fall through
       case "!social":
         sendMessage(target, socials(), command)
+        break;
+      case "!accounts":
+      case "!account":
+        return_msg = "PSN: teaja, Epic: dredgen_teaja, Activision: teaja#7667376"
+        sendMessage(target, return_msg, command)
+        break;
+      case "!psn":
+        sendMessage(target, "PSN: teaja", command)
+        break;
+      case "!epic":
+        sendMessage(target, "Epic: dredgen_teaja", command)
+        break;
+      case "!activision":
+        sendMessage(target, "Activision: teaja#7667376", command)
         break;
       case "!controller":
         sendMessage(target, "I use a Scuf Impact: https://scufgaming.com/playstation-impact-controller")
