@@ -54,7 +54,7 @@ function onMessageHandler (target, context, msg, self) {
     // If the command is known, let's execute it
     switch(command) {
       case "!commands":
-        return_msg = "Available commands: !bot, !social(s), !account(s), !psn, !epic, !activision, !controller, !lurk, !unlurk, !brb, !joke, !blind, !safeword, !queue, !join"
+        return_msg = "Available commands: !bot, !social(s), !account(s), !psn, !epic, !activision, !pyramid, !pyrmd, !cc, !discord, !merch, !controller, !lurk, !unlurk, !brb, !joke, !blind, !safeword, !queue, !join"
         sendMessage(target, return_msg, command)
         break;
       case "!bot":
@@ -78,6 +78,20 @@ function onMessageHandler (target, context, msg, self) {
         break;
       case "!activision":
         sendMessage(target, "Activision: teaja#7667376", command)
+        break;
+      case "!pyramid":
+      case "!pyrmd":
+        return_msg = "You can connect with and support Team Pyramid by: joining the discord https://discord.gg/FwMhsgp -- using the Epic creator code: pyrmd -- buying merch: https://pyrmd-design.myshopify.com/ -- or most importanly, just hanging out in stream."
+        sendMessage(target, return_msg, command)
+        break;
+      case "!cc":
+        sendMessage(target, "You can support Team Pyramid by using the Epic Creator Code: pyrmd")
+        break;
+      case "!discord":
+        sendMessage(target, "Come hang out with Teaja and the other members of Team Pyramid in our Discord! https://discord.gg/FwMhsgp")
+        break;
+      case "!merch":
+        sendMessage(target, "Check out the Team Pyramid merch! https://pyrmd-design.myshopify.com/")
         break;
       case "!controller":
         sendMessage(target, "I use a Scuf Impact: https://scufgaming.com/playstation-impact-controller")
