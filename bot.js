@@ -54,10 +54,15 @@ function onMessageHandler (target, context, msg, self) {
     // If the command is known, let's execute it
     switch(command) {
       case "!commands":
-        return_msg = "Available commands: !social(s), !controller, !lurk, !unlurk, !joke, !blind, !safeword, !queue, !join"
+        return_msg = "Available commands: !bot, !social(s), !controller, !lurk, !unlurk, !brb, !joke, !blind, !safeword, !queue, !join"
         sendMessage(target, return_msg, command)
         break;
-      case "!socials" || "!social":
+      case "!bot":
+        return_msg = "Teaja wrote me himself (based on a tutorial code). https://github.com/thomas-j-sell/twitch-chatbot"
+        sendMessage(target, return_msg, command)
+        break;
+      case "!socials": // fall through
+      case "!social":
         sendMessage(target, socials(), command)
         break;
       case "!controller":
@@ -69,6 +74,10 @@ function onMessageHandler (target, context, msg, self) {
         break;
       case "!unlurk":
         sendMessage(target,  `Welcome back ${context['display-name']}.`, command)
+        break;
+      case "!brb":
+        return_msg = "I have to step away for a moment, but I'll be right back. Would you kindly stick around?"
+        sendMessage(target, return_msg, command)
         break;
       case "!joke":
         sendMessage(target, getJoke(), command)
@@ -95,7 +104,7 @@ function onMessageHandler (target, context, msg, self) {
             break;
           default:
             if (isBlind) {
-              return_msg = `This is a blind playthrough. Please do not give any hints, tips, or criticisms unless I explicitly ask for them using my safeword: ${safeword}.`
+              return_msg = `This is a blind play-through. Please do not give any hints, tips, or criticisms unless I explicitly ask for them using my safeword: ${safeword}.`
               sendMessage(target, return_msg, command)
             } else {
               return_msg = "This is not a blind playthrough. Tips, hints, and other constructive criticisms are welcome."
@@ -145,6 +154,8 @@ function onMessageHandler (target, context, msg, self) {
               break;
             case "rules":
               return_msg = "Queue is FIFO (first in first out). Place in the queue is good for two games, but I might add a third if one gets cut really short."
+              sendMessage(target, return_msg, command)
+              break;
             default:
               if (queue.length == 0) {
                 if (queueIsOpen) {
@@ -191,7 +202,7 @@ function sendMessage(target, return_msg, command) {
 
 // !song: print message about the currently playing song
 function socials () {
-  return "If you want to keep up with me on social media you can follow on these platforms: twitter.com/teaja instagram.com/dredgen_teaja"
+  return "Hey! Listen! If you want to keep up with me on social media you can follow on these platforms: twitter.com/teaja instagram.com/dredgen_teaja"
 }
 
 // Called every time the bot connects to Twitch chat
@@ -222,6 +233,16 @@ const lurkMessages = [
   "Can you feel the lurk tonight?",
   "It's the circle of lurk.",
   "Lurkin at the car wash."
+];
+
+// returns random message from list of brb messages
+function getBrbMessage() {
+  return brbMessages[randomInt(0, brbMessages.length)];
+}
+// list of brb messages
+const brbMessages = [
+  "Would you kindly stick around",
+  "Stay a while and listen"
 ]
 
 // returns joke from list of jokes
