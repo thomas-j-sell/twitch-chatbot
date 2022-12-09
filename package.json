@@ -7,7 +7,7 @@
     "start": "node bot.js"
   },
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "tmi.js": "^1.2.1",
     "dotenv": "^6.2.0"
   },
